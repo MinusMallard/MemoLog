@@ -56,7 +56,9 @@ fun MemoLogApp(
             composable(
                 route = EntryDestination.route,
             ) {
-                EntryScreen()
+                EntryScreen(
+                    navigateBack = { navController.navigate(HomeDestination.route) }
+                )
             }
         }
     }
@@ -82,7 +84,7 @@ fun AppNavHost(
         composable(
             route = EntryDestination.route,
         ) {
-            EntryScreen()
+            EntryScreen(navigateBack = {navController.navigate(HomeDestination.route)})
         }
     }
 }

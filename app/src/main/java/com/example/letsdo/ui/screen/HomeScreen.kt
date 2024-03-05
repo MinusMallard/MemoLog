@@ -51,6 +51,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -311,29 +312,57 @@ fun Entry(
                         }
                     }
                 )
+                if (entry.title != "" && entry.title.isNotBlank() && entry.title.isNotEmpty()) {
+                    if (!cardSelect) {
+                        Text(
+                            text = entry.title,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = modifier
+                                .padding(4.dp)
+                                .weight(1f)
+                        )
+                    } else {
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                                    append(entry.title)
+                                }
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = modifier
+                                .padding(4.dp)
+                                .weight(1f)
 
-                if (!cardSelect) {
-                    Text(
-                        text = entry.title,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = modifier
-                            .padding(4.dp)
-                            .weight(1f)
-                    )
+                        )
+                    }
                 } else {
-                    Text(
-                        text = buildAnnotatedString {
-                            withStyle(style = SpanStyle(textDecoration = TextDecoration.LineThrough)) {
-                                append(entry.title)
-                            }
-                        },
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = modifier
-                            .padding(4.dp)
-                            .weight(1f)
-
-                    )
+                    if (!cardSelect) {
+                        Text(
+                            text = entry.description,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = modifier
+                                .padding(4.dp)
+                                .weight(1f),
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    } else {
+                        Text(
+                            text = buildAnnotatedString {
+                                withStyle(style = SpanStyle(textDecoration = TextDecoration.LineThrough)) {
+                                    append(entry.title)
+                                }
+                            },
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = modifier
+                                .padding(4.dp)
+                                .weight(1f),
+                            maxLines = 4,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
                 }
+
                 IconButton(onClick = { onDelete(entry) },) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -341,16 +370,19 @@ fun Entry(
                     )
                 }
             }
-            AnimatedVisibility(visible = expanded) {
-                Column(
-                    modifier = Modifier.padding(start = 40.dp)
-                ) {
-                    Text(text = entry.description,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = modifier.padding(16.dp)
-                    )
+            if (entry.description.isNotBlank() && entry.title.isNotBlank()) {
+                AnimatedVisibility(visible = expanded) {
+                    Column(
+                        modifier = Modifier.padding(start = 40.dp)
+                    ) {
+                        Text(text = entry.description,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = modifier.padding(16.dp)
+                        )
+                    }
                 }
             }
+
             Divider(Modifier.fillMaxWidth())
     }
 }
