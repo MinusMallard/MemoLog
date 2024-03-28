@@ -2,4 +2,5 @@
     <string name="app_name">Memo Log</string>
     <string name="add_button">Add Button</string>
     <string name="no_item_description">oops! no entries</string>
+    <string name="no_notes">oops! no notes</string>
 </resources>
