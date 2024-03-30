@@ -18,12 +18,6 @@ class EntryScreenViewModel(
     private val entriesRepository: EntriesRepository
 ): ViewModel() {
 
-    private val entryId: Int = 1
-
-    companion object {
-        private const val TIMEOUT_MILLIS = 5000L
-    }
-
     var uiState by mutableStateOf(Entry(title ="", description = ""))
         private set
 
@@ -42,7 +36,6 @@ class EntryScreenViewModel(
         viewModelScope.launch {
             entriesRepository.insertEntry(uiState)
         }
-
     }
 
     fun validateInput(): Boolean {
@@ -58,11 +51,3 @@ class EntryScreenViewModel(
     }
 
 }
-
-//
-//data class EntryUiState(
-//    val id: Int = 0,
-//    val title: String = "",
-//    val description: String = "",
-//    val marked: Boolean = false
-//)
