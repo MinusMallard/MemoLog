@@ -28,6 +28,6 @@ interface EntryDao {
     fun getEntries(search: String): Flow<List<Entry>>
 
     @Query("SELECT * FROM entry WHERE id = :id")
-    fun getEntry(id: Int): Flow<Entry>
+    suspend fun getEntry(id: Int): Entry
 
 }
