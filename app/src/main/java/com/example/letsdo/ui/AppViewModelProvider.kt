@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.letsdo.ToDoApplication
 import com.example.letsdo.ui.viewmodel.EntryScreenViewModel
 import com.example.letsdo.ui.viewmodel.HomeViewModel
+import com.example.letsdo.ui.viewmodel.NoteViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -18,6 +19,11 @@ object AppViewModelProvider {
         initializer {
             EntryScreenViewModel(
                 this.toDoApplication().container.entriesRepository
+            )
+        }
+        initializer {
+            NoteViewModel(
+                this.toDoApplication().container.notesRepository
             )
         }
     }
