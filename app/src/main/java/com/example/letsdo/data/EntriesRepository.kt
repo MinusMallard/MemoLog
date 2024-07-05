@@ -15,5 +15,6 @@ interface EntriesRepository {
 
     fun getAllEntriesStream(): Flow<List<Entry>>
 
-    fun getEntryStream(id: Int): Flow<Entry>
+    suspend fun getEntryStream(id: Int): Entry
+
 }
