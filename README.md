@@ -30,5 +30,6 @@ Creating A Pull Request
 
 
 ## Download Apk
+https://github.com/MinusMallard/MemoLog/blob/main/app/release/app-release.apk
 
 
