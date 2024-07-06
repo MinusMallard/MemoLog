@@ -184,9 +184,8 @@ fun NoteScreen(
             )
         } else {
             LazyVerticalStaggeredGrid(
-
                 modifier = Modifier.padding(innerPadding),
-                columns = StaggeredGridCells.Adaptive(120.dp),
+                columns = StaggeredGridCells.Adaptive(160.dp),
                 verticalItemSpacing = 4.dp,
                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                 userScrollEnabled = true
