@@ -10,7 +10,7 @@ class OfflineEntriesRepository(private val entryDao: EntryDao): EntriesRepositor
 
     override fun getAllEntriesStream(): Flow<List<Entry>> = entryDao.getAllEntries()
 
-    override fun getEntryStream(id: Int): Flow<Entry> = entryDao.getEntry(id)
+    override suspend fun getEntryStream(id: Int): Entry = entryDao.getEntry(id)
 
     override fun getEntriesStream(search: String): Flow<List<Entry>> = entryDao.getEntries(search)
 
