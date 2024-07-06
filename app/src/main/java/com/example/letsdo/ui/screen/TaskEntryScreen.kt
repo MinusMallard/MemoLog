@@ -1,19 +1,23 @@
 package com.example.letsdo.ui.screen
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults.windowInsets
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -41,6 +45,7 @@ object EntryDestination : NavDestination {
     override val route = "entry_details"
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EntryScreen(
     navigateBack:() -> Unit,
@@ -58,54 +63,25 @@ fun EntryScreen(
             navController.popBackStack()
         }
     )
-//    BackHandler(
-//        onBack = { navigateBack()
-//            if (viewModel.validateInput()) {
-//                viewModel.addEntry()
-//            }
-//        }
-//    )
-
-
     if (id != -1) {
         LaunchedEffect(Unit) {
             viewModel.loadEntry(id)
         }
+    } else {
+        LaunchedEffect(Unit) {
+            viewModel.updateUiStateId(id)
+        }
     }
     val coroutineScope = rememberCoroutineScope()
     Box(modifier = Modifier
+        .padding(windowInsets.asPaddingValues())
         .fillMaxSize()
         .background(MaterialTheme.colorScheme.primaryContainer)) {
-        Column {
-//        Row(modifier = modifier
-//            .padding(4.dp)
-//            .fillMaxWidth(),
-//            horizontalArrangement = Arrangement.End
-//        ) {
-//            IconButton(
-//                onClick = { navigateBack() },
-//                colors = IconButtonDefaults.iconButtonColors(
-//                    containerColor = MaterialTheme.colorScheme.primary,
-//                    contentColor = MaterialTheme.colorScheme.onPrimary
-//                )
-//            ){
-//                Icon(imageVector = Icons.Default.Close, contentDescription = null)
-//            }
-//            IconButton(onClick = {
-//                                 coroutineScope.launch {
-//                                     viewModel.addEntry()
-//                                     navigateBack()
-//                                 }
-//                },
-//                colors = IconButtonDefaults.iconButtonColors(
-//                    containerColor = MaterialTheme.colorScheme.primary,
-//                    contentColor = MaterialTheme.colorScheme.onPrimary
-//                ),
-//                enabled = viewModel.validateInput(viewModel.uiState)
-//                ) {
-//                Icon(imageVector = Icons.Default.Check, contentDescription = null)
-//            }
-//        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 8.dp, end = 8.dp)
+        ) {
             val focusRequester = remember {
                 FocusRequester()
             }
@@ -117,11 +93,11 @@ fun EntryScreen(
                 textStyle = TextStyle(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Light,
-                    fontFamily = crimsonFontFamily
+                    fontFamily = crimsonFontFamily,
+                    color = MaterialTheme.colorScheme.primary
                 ),
                 modifier = modifier
-                    .fillMaxWidth()
-                    .padding(4.dp)
+                    .fillMaxWidth().padding(bottom = 4.dp)
                     .height(120.dp)
 
                     .align(Alignment.CenterHorizontally),
@@ -130,19 +106,18 @@ fun EntryScreen(
                         modifier = Modifier.padding(4.dp),
                         fontSize = 24.sp,
                         fontWeight = FontWeight.Thin,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        fontFamily = crimsonFontFamily
                     )
                 },
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
 
                 keyboardActions = KeyboardActions(onNext = { focusRequester.requestFocus() }),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primaryContainer,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.primaryContainer,
-                    focusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                    focusedTextColor = MaterialTheme.colorScheme.primary,
-                    unfocusedTextColor = MaterialTheme.colorScheme.primary
+                    focusedBorderColor = MaterialTheme.colorScheme.background,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.background,
+                    focusedContainerColor = MaterialTheme.colorScheme.background,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.background,
                 ),
 
             )
@@ -151,7 +126,12 @@ fun EntryScreen(
                 onValueChange = { viewModel.updateUiStateDesc(it)},
                 modifier = modifier
                     .fillMaxSize().focusRequester(focusRequester),
-                placeholder = {Text(text = "Start writing something......")},
+                placeholder = {
+                    Text(
+                        text = "Start writing something......",
+                        fontFamily = crimsonFontFamily,
+                        color = MaterialTheme.colorScheme.primary,
+                    ) },
                 textStyle = TextStyle(
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Light,
@@ -177,14 +157,3 @@ fun EntryScreen(
         }
     }
 }
-
-
-
-
-//@Preview (showBackground =  true)
-//@Composable
-//fun EntryScreenPreview() {
-//    LetsDoTheme {
-//        EntryScreen(navigateBack =  {}, id = -1)
-//    }
-//}
