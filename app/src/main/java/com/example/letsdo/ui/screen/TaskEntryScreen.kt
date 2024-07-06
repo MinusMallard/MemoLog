@@ -15,18 +15,21 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
 import com.example.letsdo.ui.AppViewModelProvider
 import com.example.letsdo.ui.navigation.NavDestination
 import com.example.letsdo.ui.theme.LetsDoTheme
@@ -42,15 +45,33 @@ object EntryDestination : NavDestination {
 fun EntryScreen(
     navigateBack:() -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: EntryScreenViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: EntryScreenViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    id: Int,
+    navController: NavHostController
 ) {
 
-    BackHandler(onBack = { navigateBack()
-        if (viewModel.validateInput()) {
-            viewModel.addEntry()
-        }
+    BackHandler(
+        onBack = {
+            if (viewModel.validateInput()) {
+                viewModel.addEntry()
+            }
+            navController.popBackStack()
         }
     )
+//    BackHandler(
+//        onBack = { navigateBack()
+//            if (viewModel.validateInput()) {
+//                viewModel.addEntry()
+//            }
+//        }
+//    )
+
+
+    if (id != -1) {
+        LaunchedEffect(Unit) {
+            viewModel.loadEntry(id)
+        }
+    }
     val coroutineScope = rememberCoroutineScope()
     Box(modifier = Modifier
         .fillMaxSize()
@@ -93,10 +114,10 @@ fun EntryScreen(
                 onValueChange = {
                     viewModel.updateUiStateTitle(it)
                 },
-                textStyle = androidx.compose.ui.text.TextStyle(
+                textStyle = TextStyle(
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Light,
-
+                    fontFamily = crimsonFontFamily
                 ),
                 modifier = modifier
                     .fillMaxWidth()
@@ -127,10 +148,16 @@ fun EntryScreen(
             )
             OutlinedTextField(
                 value = viewModel.uiState.description,
-                onValueChange = { viewModel.updateUistateDesc(it)},
+                onValueChange = { viewModel.updateUiStateDesc(it)},
                 modifier = modifier
                     .fillMaxSize().focusRequester(focusRequester),
                 placeholder = {Text(text = "Start writing something......")},
+                textStyle = TextStyle(
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Light,
+                    fontFamily = crimsonFontFamily,
+                    color = MaterialTheme.colorScheme.primary
+                ),
                 keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(
                     onDone = {
@@ -154,10 +181,10 @@ fun EntryScreen(
 
 
 
-@Preview (showBackground =  true)
-@Composable
-fun EntryScreenPreview() {
-    LetsDoTheme {
-        EntryScreen(navigateBack =  {})
-    }
-}
+//@Preview (showBackground =  true)
+//@Composable
+//fun EntryScreenPreview() {
+//    LetsDoTheme {
+//        EntryScreen(navigateBack =  {}, id = -1)
+//    }
+//}
