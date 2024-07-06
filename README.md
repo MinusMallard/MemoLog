@@ -28,6 +28,9 @@ Creating A Pull Request
 
     5. Open a Pull Request
 
+## Demo
+https://github.com/MinusMallard/MemoLog/assets/116078997/26138045-c3e1-4228-ba0c-cd58b76c0003
+
 
 ## Download Apk
 https://github.com/MinusMallard/MemoLog/blob/main/app/release/app-release.apk
