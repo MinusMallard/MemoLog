@@ -1,35 +1,40 @@
 package com.example.letsdo.ui.screen
 
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.consumedWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.rounded.Search
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.Create
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -57,53 +62,84 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.letsdo.R
 import com.example.letsdo.data.Entry
 import com.example.letsdo.ui.AppViewModelProvider
+import com.example.letsdo.ui.navigation.BottomNavigationItem
 import com.example.letsdo.ui.navigation.NavDestination
 import com.example.letsdo.ui.theme.LetsDoTheme
-import com.example.letsdo.ui.viewmodel.HomeUiState
 import com.example.letsdo.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.RadioButtonDefaults
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.navigation.NavHostController
+import kotlinx.coroutines.delay
 
 
 object HomeDestination: NavDestination {
     override val route: String = "home"
 }
 
+val items = listOf(
+    BottomNavigationItem(
+        title = "Tasks",
+        selectedIcon = Icons.Filled.DateRange,
+        unselectedIcon = Icons.Outlined.DateRange,
+        route = HomeDestination.route
+    ),
+    BottomNavigationItem(
+        title = "Notes",
+        selectedIcon = Icons.Filled.Create,
+        unselectedIcon = Icons.Outlined.Create,
+        route = NoteDestination.route
+    )
+)
+
+
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun HomeScreen(
-    navigateToUpdateEntry: (Int) -> Unit,
     navigateToEnterEntry: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: HomeViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    navController: NavController,
+    selectedItemIndex: Int = 0
 ) {
+
+    BackHandler(
+        onBack = {
+
+            navController.popBackStack()
+        }
+    )
     val coroutineScope = rememberCoroutineScope()
     val homeUiState by viewModel.homeUiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(rememberTopAppBarState())
-    Scaffold(
 
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             MediumTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Text(text = "All Notes",
+                    Text(text = "All Tasks",
+                        fontFamily = crimsonFontFamily,
                         fontWeight = FontWeight.Medium,
-                        fontSize = 36.sp,
+                        fontSize = 32.sp,
                         )},
-                navigationIcon = {
-                    IconButton(onClick = { /*TODO*/ },
-
-                        ){
-                        Icon(imageVector = Icons.Rounded.Search, contentDescription ="search screen")
-                    }
-                },
-
+                scrollBehavior = scrollBehavior
             )
         },
         floatingActionButton = {
@@ -119,8 +155,54 @@ fun HomeScreen(
                 )
             }
         },
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface
+            ) {
+                items.forEachIndexed { index, item ->
+                    NavigationBarItem(
+                        selected = selectedItemIndex == index,
+                        onClick = {
+                            navController.navigate(item.route)
+                        },
+                        icon = {
+                            Icon(
+                                imageVector = if (index == selectedItemIndex) {
+                                    item.selectedIcon
+                                } else {
+                                    item.unselectedIcon
+                                },
+                                contentDescription = null
+                            )
+                        },
+                        label = {
+                            Text(text = item.title)
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = MaterialTheme.colorScheme.primary,
+                            selectedTextColor = MaterialTheme.colorScheme.primary,
+                            unselectedIconColor = MaterialTheme.colorScheme.primary,
+                            unselectedTextColor = MaterialTheme.colorScheme.primary,
+                            disabledIconColor = MaterialTheme.colorScheme.error,
+                            disabledTextColor = MaterialTheme.colorScheme.error
+                        )
+                    )
+                }
+
+            }
+        }
     ) { innerPadding ->
-        if (homeUiState.copy().entryList.isEmpty()) {
+        var showLoading by rememberSaveable { mutableStateOf(true) }
+        if (showLoading) {
+            LaunchedEffect(key1 = showLoading) {
+                if (showLoading) {
+                    delay(250) // Delay for 2 seconds
+                    showLoading = false
+                }
+            }
+            FullScreenLoadingIndicator(showLoading)
+        }else if (homeUiState.copy().entryList.isEmpty()) {
             Text(
                 text = stringResource(R.string.no_item_description),
                 modifier = Modifier
@@ -128,15 +210,20 @@ fun HomeScreen(
                     .fillMaxSize()
                 ,
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge
+                style = MaterialTheme.typography.titleLarge,
+                fontFamily = crimsonFontFamily,
+                color = MaterialTheme.colorScheme.primary,
+                fontSize = 24.sp
             )
         } else {
-            LazyColumn(modifier = Modifier) {
-                item { Spacer(modifier = Modifier.padding(innerPadding)) }
+            LazyColumn(modifier = Modifier.padding(innerPadding)) {
+                //item { Spacer(modifier = Modifier) }
                 items (homeUiState.copy().entryList) { item->
                     Box(modifier = Modifier) {
                         Entry(
                             entry = item,
+                            navigateToEdit = {
+                                navController.navigate("${EntryDestination.route}/${it}")},
                             onMarked = { coroutineScope.launch {
                                 viewModel.updateEntry(it)
                             }},
@@ -153,8 +240,19 @@ fun HomeScreen(
     }
 }
 
-
-
+@Composable
+fun FullScreenLoadingIndicator(showLoading: Boolean) {
+    if (showLoading) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0f))
+        ) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    }
+}
 
 //@Composable
 //fun EntriesList(
@@ -281,6 +379,7 @@ fun Entry(
     onMarked:(Entry) -> Unit,
     modifier: Modifier = Modifier,
     onDelete:(Entry) -> Unit,
+    navigateToEdit: (Int) -> Unit,
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
     var cardSelect by rememberSaveable { mutableStateOf(entry.marked)}
@@ -292,7 +391,11 @@ fun Entry(
                     enabled = !cardSelect,
                     onClick = {
                         expanded = !expanded
-                    }
+                    },
+                    interactionSource = remember {
+                        MutableInteractionSource()
+                    },
+                    indication = null
                 )
         ) {
             Row(
@@ -307,10 +410,14 @@ fun Entry(
                         onMarked(
                             entry.copy(marked = cardSelect)
                         )
-                        if (expanded == true){
+                        if (expanded){
                             expanded = !expanded
                         }
-                    }
+                    },
+                    colors = RadioButtonDefaults.colors(
+                        selectedColor = MaterialTheme.colorScheme.primary,
+                        unselectedColor = MaterialTheme.colorScheme.primary
+                    )
                 )
                 if (entry.title != "" && entry.title.isNotBlank() && entry.title.isNotEmpty()) {
                     if (!cardSelect) {
@@ -319,7 +426,12 @@ fun Entry(
                             style = MaterialTheme.typography.titleMedium,
                             modifier = modifier
                                 .padding(4.dp)
-                                .weight(1f)
+                                .weight(1f),
+                            fontSize = 18.sp,
+                            fontFamily = crimsonFontFamily,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.primary,
                         )
                     } else {
                         Text(
@@ -331,7 +443,12 @@ fun Entry(
                             style = MaterialTheme.typography.titleMedium,
                             modifier = modifier
                                 .padding(4.dp)
-                                .weight(1f)
+                                .weight(1f),
+                            fontFamily = crimsonFontFamily,
+                            color = MaterialTheme.colorScheme.primary,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            fontSize = 18.sp
 
                         )
                     }
@@ -340,30 +457,52 @@ fun Entry(
                         Text(
                             text = entry.description,
                             style = MaterialTheme.typography.titleMedium,
+                            fontFamily = crimsonFontFamily,
                             modifier = modifier
                                 .padding(4.dp)
                                 .weight(1f),
-                            maxLines = 4,
-                            overflow = TextOverflow.Ellipsis
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 18.sp
                         )
                     } else {
                         Text(
                             text = buildAnnotatedString {
                                 withStyle(style = SpanStyle(textDecoration = TextDecoration.LineThrough)) {
-                                    append(entry.title)
+                                    append(entry.description)
                                 }
                             },
                             style = MaterialTheme.typography.titleMedium,
+                            fontFamily = crimsonFontFamily,
                             modifier = modifier
                                 .padding(4.dp)
                                 .weight(1f),
                             maxLines = 4,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 18.sp
                         )
                     }
                 }
-
-                IconButton(onClick = { onDelete(entry) },) {
+                IconButton(
+                    onClick = { navigateToEdit(entry.id) },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                    ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null
+                    )
+                }
+                IconButton(
+                    onClick = { onDelete(entry) },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary
+                    )
+                    )
+                {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null
@@ -377,71 +516,57 @@ fun Entry(
                     ) {
                         Text(text = entry.description,
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = modifier.padding(16.dp)
+                            modifier = modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.primary
                         )
                     }
                 }
             }
-
-            Divider(Modifier.fillMaxWidth())
+            ThinWavyLine()
     }
 }
 
+@Composable
+fun ThinWavyLine() {
+    Spacer(
+        modifier = Modifier
+            .fillMaxWidth()
+            .drawWithCache {
+                val path = Path()
+                val amplitude = 10f // height of the wave
+                val frequency = 0.1f // how many waves in the canvas width
 
-//@Composable
-//fun SearchAction(
-//    modifier: Modifier = Modifier
-//) {
-//    var newEntry by rememberSavable {
-//        mutableStateOf("")
-//    }
-//    Box {
-//        OutlinedTextField(
-//            maxLines = 1,
-//            value = newEntry,
-//            onValueChange = {
-//                newEntry = it
-//            },
-//            modifier = modifier
-//                .padding(8.dp)
-//                .fillMaxWidth(),
-//            shape = RoundedCornerShape(10.dp),
-//            leadingIcon = {
-//                Icon(
-//                    imageVector = Icons.Outlined.Search,
-//                    tint = MaterialTheme.colorScheme.primary,
-//                    contentDescription = null
-//                )
-//            },
-//            placeholder = {
-//                Text(text = "search",color = MaterialTheme.colorScheme.primary)
-//            },
-//            colors = OutlinedTextFieldDefaults.colors(
-//                focusedBorderColor = MaterialTheme.colorScheme.primary,
-//                unfocusedBorderColor = MaterialTheme.colorScheme.primary
-//            )
-//        )
-//    }
-//}
+                // Start at the middle-left of the canvas
+                path.moveTo(0f, size.height / 2)
 
+                // Draw the wavy line
+                for (x in 0..size.width.toInt()) {
+                    val y = kotlin.math.sin(x * frequency) * amplitude + size.height / 2
+                    path.lineTo(x.toFloat(), y.toFloat())
+                }
+                onDrawBehind {
+                    drawPath(path, Color.Gray, style = Stroke(width = 2f))
+                }
+            }
+            .fillMaxSize()
+    )
+}
 
 @Preview(showBackground = true)
 @Composable
 fun EntryCardPreview(){
     LetsDoTheme {
         Entry(entry = Entry(id = 0,title = "do this", description =  "nothing", marked = false),
-            onMarked = {}, onDelete = {}
+            onMarked = {}, onDelete = {}, navigateToEdit = {}
         )
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
 fun HomeBodyPreview() {
     LetsDoTheme {
-        HomeScreen(navigateToEnterEntry = {}, navigateToUpdateEntry = {})
+        HomeScreen(navigateToEnterEntry = {}, navController = rememberNavController())
     }
 }
 
