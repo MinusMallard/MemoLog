@@ -1,8 +1,5 @@
 package com.example.letsdo.ui.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.letsdo.data.EntriesRepository
@@ -21,8 +18,6 @@ class HomeViewModel(
         private const val TIMEOUT_MILLIS = 5000L
     }
 
-
-
     val homeUiState: StateFlow<HomeUiState> = entriesRepository.getAllEntriesStream().map { HomeUiState(it) }
         .stateIn(
             scope = viewModelScope,
@@ -38,16 +33,17 @@ class HomeViewModel(
         entriesRepository.deleteEntry(entry)
     }
 
-    suspend fun searchEntry(search: String): StateFlow<HomeUiState> {
-        val searchUiState: StateFlow<HomeUiState> = entriesRepository.getEntriesStream(search).map { HomeUiState(it) }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-                initialValue = HomeUiState()
-            )
-
-        return searchUiState
-    }
+//    suspend fun searchEntry(search: String): StateFlow<HomeUiState> {
+//        val searchUiState: StateFlow<HomeUiState> = entriesRepository.getEntriesStream(search).map { HomeUiState(it) }
+//            .stateIn(
+//                scope = viewModelScope,
+//                started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
+//                initialValue = HomeUiState()
+//            )
+//
+//        return searchUiState
+//    }
 }
 
 data class HomeUiState(val entryList: List<Entry> = listOf())
+
