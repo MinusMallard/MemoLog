@@ -7,11 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.letsdo.data.EntriesRepository
 import com.example.letsdo.data.Entry
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class EntryScreenViewModel(
@@ -20,17 +15,6 @@ class EntryScreenViewModel(
 
     var uiState by mutableStateOf(Entry(title ="", description = ""))
         private set
-
-
-//    val uiState: StateFlow<EntryUiState> =
-//        entriesRepository.getEntryStream(entryId).filterNotNull().map {
-//            EntryUiState(entryDetails = it)
-//        }.stateIn(
-//            scope = viewModelScope,
-//            started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
-//            initialValue = EntryUiState()
-//        )
-
 
     fun addEntry() {
         viewModelScope.launch {
@@ -46,8 +30,14 @@ class EntryScreenViewModel(
         uiState = uiState.copy(title = it)
     }
 
-    fun updateUistateDesc(it: String) {
+    fun updateUiStateDesc(it: String) {
         uiState = uiState.copy(description = it)
+    }
+
+    fun loadEntry(id: Int) {
+        viewModelScope.launch {
+            uiState = entriesRepository.getEntryStream(id);
+        }
     }
 
 }
