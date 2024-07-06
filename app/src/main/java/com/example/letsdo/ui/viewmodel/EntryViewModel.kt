@@ -18,7 +18,11 @@ class EntryScreenViewModel(
 
     fun addEntry() {
         viewModelScope.launch {
-            entriesRepository.insertEntry(uiState)
+            if (uiState.id == -1) {
+                entriesRepository.insertEntry(Entry(title = uiState.title, description = uiState.description))
+            } else {
+                entriesRepository.updateEntry(Entry(id = uiState.id, title = uiState.title, description = uiState.description))
+            }
         }
     }
 
@@ -34,9 +38,13 @@ class EntryScreenViewModel(
         uiState = uiState.copy(description = it)
     }
 
+    fun updateUiStateId(it: Int) {
+        uiState = uiState.copy(id = it)
+    }
+
     fun loadEntry(id: Int) {
         viewModelScope.launch {
-            uiState = entriesRepository.getEntryStream(id);
+            uiState = uiState.copy(id = entriesRepository.getEntryStream(id).id ,title = entriesRepository.getEntryStream(id).title, description = entriesRepository.getEntryStream(id).description);
         }
     }
 
