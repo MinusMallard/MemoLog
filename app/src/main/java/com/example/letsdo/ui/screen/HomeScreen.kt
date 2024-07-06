@@ -517,7 +517,9 @@ fun Entry(
                         Text(text = entry.description,
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = modifier.padding(16.dp),
-                            color = MaterialTheme.colorScheme.primary
+                            color = MaterialTheme.colorScheme.primary,
+                            fontSize = 18.sp,
+                            fontFamily = crimsonFontFamily
                         )
                     }
                 }
